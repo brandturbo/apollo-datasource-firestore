@@ -1,7 +1,8 @@
 /* eslint-env mocha */
+// These types should be changed to use 'admin-firebase'
 import { CollectionReference, DocumentReference, FieldValue, Firestore, GeoPoint, Timestamp } from '@google-cloud/firestore'
-import fetch from 'node-fetch'
 import assert from 'assert'
+import fetch from 'node-fetch'
 
 import { FirestoreDataSource } from '../src'
 

@@ -1,4 +1,5 @@
-import { CollectionReference, DocumentReference, FirestoreDataConverter, GeoPoint, PartialWithFieldValue, Timestamp } from '@google-cloud/firestore'
+import type { CollectionReference, FirestoreDataConverter, PartialWithFieldValue } from '@google-cloud/firestore'
+import { firestore } from 'firebase-admin'
 
 export const isFirestoreCollection = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,11 +40,11 @@ export function reviverFactory (collection: CollectionReference) {
       const split = value.split(':')
       switch (split[0]) {
         case '$$Timestamp$$':
-          return new Timestamp(parseInt(split[1], 10), parseInt(split[2], 10))
+          return new firestore.Timestamp(parseInt(split[1], 10), parseInt(split[2], 10))
         case '$$DocumentReference$$':
           return collection.firestore.doc(split[1])
         case '$$GeoPoint$$':
-          return new GeoPoint(parseFloat(split[1]), parseFloat(split[2]))
+          return new firestore.GeoPoint(parseFloat(split[1]), parseFloat(split[2]))
         default:
           return value
       }
@@ -52,11 +53,11 @@ export function reviverFactory (collection: CollectionReference) {
 }
 
 export function replacer (key: string | number, value: any) {
-  if (value instanceof Timestamp) {
+  if (value instanceof firestore.Timestamp) {
     return `$$Timestamp$$:${value.seconds}:${value.nanoseconds}`
-  } else if (value instanceof DocumentReference) {
+  } else if (value instanceof firestore.DocumentReference) {
     return `$$DocumentReference$$:${value.path}`
-  } else if (value instanceof GeoPoint) {
+  } else if (value instanceof firestore.GeoPoint) {
     return `$$GeoPoint$$:${value.latitude}:${value.longitude}`
   } else return value
 }

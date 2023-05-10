@@ -1,6 +1,7 @@
-import { CollectionReference, FieldPath } from '@google-cloud/firestore'
+import type { CollectionReference } from '@google-cloud/firestore'
 import { KeyValueCache } from 'apollo-server-caching'
 import DataLoader from 'dataloader'
+import { firestore } from 'firebase-admin'
 import { FirestoreDataSourceOptions } from './datasource'
 import { replacer, reviverFactory } from './helpers'
 
@@ -62,7 +63,7 @@ export const createCachingMethods = <DType extends { id: string }>({
 }: createCatchingMethodArgs<DType>): CachedMethods<DType> => {
   const loader = new DataLoader<string, DType>(async (ids) => {
     options?.logger?.debug(`FirestoreDataSource/DataLoader: loading for IDs: ${ids}`)
-    const qSnap = await collection.where(FieldPath.documentId(), 'in', ids).get()
+    const qSnap = await collection.where(firestore.FieldPath.documentId(), 'in', ids).get()
     const documents = qSnap.docs.map(dSnap => dSnap.exists ? dSnap.data() : undefined)
     options?.logger?.debug(`FirestoreDataSource/DataLoader: response count: ${documents.length}`)
 
