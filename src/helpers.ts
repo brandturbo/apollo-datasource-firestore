@@ -1,10 +1,10 @@
-import type { CollectionReference, FirestoreDataConverter, PartialWithFieldValue } from '@google-cloud/firestore'
 import { firestore } from 'firebase-admin'
+import { PartialWithFieldValue } from './types'
 
 export const isFirestoreCollection = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   maybeCollection: any
-): maybeCollection is CollectionReference => {
+): maybeCollection is firestore.CollectionReference => {
   return (
     maybeCollection.id &&
     maybeCollection.path &&
@@ -18,7 +18,7 @@ export interface LibraryFields {
   readonly collection: string
 }
 
-export const FirestoreConverter = <TData extends LibraryFields>(): FirestoreDataConverter<TData> => ({
+export const FirestoreConverter = <TData extends LibraryFields>(): firestore.FirestoreDataConverter<TData> => ({
   toFirestore: ({ id, collection, ...data }: PartialWithFieldValue<TData>) => data,
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   fromFirestore: (snap: FirebaseFirestore.QueryDocumentSnapshot) => ({ id: snap.id, collection: snap.ref.parent.id, ...snap.data() }) as TData
@@ -34,7 +34,7 @@ export interface Logger {
 
 const symbolMatch = /^\$\$(Timestamp|GeoPoint|DocumentReference)\$\$:/
 
-export function reviverFactory (collection: CollectionReference) {
+export function reviverFactory (collection: firestore.CollectionReference) {
   return function reviver (key: string | number, value: any) {
     if (typeof value === 'string' && symbolMatch.test(value)) {
       const split = value.split(':')

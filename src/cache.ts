@@ -1,4 +1,3 @@
-import type { CollectionReference } from '@google-cloud/firestore'
 import { KeyValueCache } from 'apollo-server-caching'
 import DataLoader from 'dataloader'
 import { firestore } from 'firebase-admin'
@@ -31,7 +30,7 @@ const orderDocs = <V>(ids: readonly string[]) => (
 }
 
 export interface createCatchingMethodArgs<DType> {
-  collection: CollectionReference<DType>
+  collection: firestore.CollectionReference<DType>
   cache: KeyValueCache
   options: FirestoreDataSourceOptions
 }

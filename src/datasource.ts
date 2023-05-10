@@ -1,9 +1,10 @@
 import { DataSource } from 'apollo-datasource'
 import { InMemoryLRUCache, KeyValueCache } from 'apollo-server-caching'
-import type { CollectionReference, PartialWithFieldValue, Query, WithFieldValue } from '@google-cloud/firestore'
+import { firestore } from 'firebase-admin'
 
 import { Logger, isFirestoreCollection, FirestoreConverter, LibraryFields } from './helpers'
 import { createCachingMethods, CachedMethods, FindArgs } from './cache'
+import { PartialWithFieldValue, WithFieldValue } from './types'
 
 export interface FirestoreDataSourceOptions {
   logger?: Logger
@@ -18,7 +19,7 @@ export type QueryFindArgs = FindArgs
 export class FirestoreDataSource<TData extends LibraryFields, TContext>
   extends DataSource<TContext>
   implements CachedMethods<TData> {
-  collection: CollectionReference<TData>
+  collection: firestore.CollectionReference<TData>
   context?: TContext
   options: FirestoreDataSourceOptions
   // these get set by the initializer but they must be defined or nullable after the constructor
@@ -40,7 +41,7 @@ export class FirestoreDataSource<TData extends LibraryFields, TContext>
    * @param options
    */
   async findManyByQuery (
-    queryFunction: (collection: CollectionReference<TData>) => Query<TData>,
+    queryFunction: (collection: firestore.CollectionReference<TData>) => firestore.Query<TData>,
     { ttl }: QueryFindArgs = {}
   ) {
     const qSnap = await queryFunction(this.collection).get()
@@ -79,7 +80,7 @@ export class FirestoreDataSource<TData extends LibraryFields, TContext>
     this.options?.logger?.debug(`FirestoreDataSource/updateOne: Updating doc id ${data.id}`)
     await this.collection
       .doc(data.id)
-      .set(data)
+      .set(data as TData)
 
     const dSnap = await this.collection.doc(data.id).get()
     const result = dSnap.data()
@@ -93,7 +94,7 @@ export class FirestoreDataSource<TData extends LibraryFields, TContext>
     this.options?.logger?.debug(`FirestoreDataSource/updateOnePartial: Updating doc id ${id}`)
     await this.collection
       .doc(id)
-      .set(data, { merge: true })
+      .set(data as TData, { merge: true })
 
     const dSnap = await this.collection.doc(id).get()
     const result = dSnap.data()
@@ -103,7 +104,7 @@ export class FirestoreDataSource<TData extends LibraryFields, TContext>
     return result
   }
 
-  constructor (collection: CollectionReference<TData>, options: FirestoreDataSourceOptions = {}) {
+  constructor (collection: firestore.CollectionReference<TData>, options: FirestoreDataSourceOptions = {}) {
     super()
     options?.logger?.debug('FirestoreDataSource started')
 
